@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -10,14 +10,14 @@ namespace File_manager
 {
     internal class Program
     {
+        private static string selectedFile = "";
+        private static string currentPath = "";
+
         static void Main(string[] args)
         {
             var elems = new[]
             {
                 new Element("Получить содержимое директории") { Command = InfoFile },
-                new Element("Получить содержимое директории"), 
-                new Element("Получить содержимое директории"),
-                new Element("Получить содержимое директории"),
                 new Element("       \n Выход \n       ") { Command = Exit }
             };
 
@@ -29,7 +29,7 @@ namespace File_manager
                 switch (key)
                 {
                     case ConsoleKey.UpArrow:
-                        menu.SelectPrev();             
+                        menu.SelectPrev();
                         break;
                     case ConsoleKey.DownArrow:
                         menu.SelectNext();
@@ -46,46 +46,15 @@ namespace File_manager
         private static void InfoFile()
         {
             Console.Clear();
-            Console.WriteLine("Вставьте путь директрии в формате (C:\\папка\\папка)");
+            Console.WriteLine("Вставьте путь директории в формате (C:\\папка\\папка):");
 
             try
             {
                 var path = Console.ReadLine();
-
                 if (Directory.Exists(path))
                 {
-                    var files = Directory.GetFiles(path);
-                    var directories = Directory.GetDirectories(path);
-
-                    Console.WriteLine("Содержимое директории:");
-
-                    if (files.Length > 0)
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Файлы:");
-                        foreach (var file in files)
-                        {
-                            Console.WriteLine(Path.GetFileName(file));
-                        }
-                    }
-                    else
-                    {
-                        Console.Clear();
-                        Console.WriteLine("Нет файлов.");
-                    }
-
-                    if (directories.Length > 0)
-                    {
-                        Console.WriteLine("\nПодкаталоги:");
-                        foreach (var directory in directories)
-                        {
-                            Console.WriteLine(Path.GetFileName(directory));
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Нет подкаталогов.");
-                    }
+                    currentPath = path;
+                    NavigateDirectory(path);
                 }
                 else
                 {
@@ -98,7 +67,138 @@ namespace File_manager
                 Console.Clear();
                 Console.WriteLine($"Произошла ошибка: {ex.Message}");
             }
+        }
+
+        private static void NavigateDirectory(string path)
+        {
+            while (true)
+            {
+                var directories = Directory.GetDirectories(path);
+                var files = Directory.GetFiles(path);
+
+                Console.Clear();
+                Console.WriteLine($"Содержимое директории: {path}");
+
+                List<Element> elements = new List<Element>();
+
+                if (path != @"C:\" && path != Directory.GetDirectoryRoot(path))
+                {
+                    elements.Add(new Element(".. (вернуться в предыдущую директорию)") { Command = () => NavigateDirectory(Directory.GetParent(path).FullName) });
+                }
+
+                Console.WriteLine("Подкаталоги:");
+                foreach (var directory in directories)
+                {
+                    Console.WriteLine($"{Path.GetFileName(directory)}");
+                    elements.Add(new Element(Path.GetFileName(directory)) { Command = () => NavigateDirectory(directory) });
+                }
+
+                Console.WriteLine("\nФайлы:");
+                foreach (var file in files)
+                {
+                    Console.WriteLine($"{Path.GetFileName(file)}");
+                    elements.Add(new Element(Path.GetFileName(file)) { Command = () => SelectFile(file) });
+                }
+
+                Console.WriteLine("\nВведите название файла или подкаталога для навигации, или 'exit' для выхода.");
+
+                string input = Console.ReadLine();
+                if (input.ToLower() == "exit") return;
+
+                bool found = false;
+
+                foreach (var directory in directories)
+                {
+                    if (Path.GetFileName(directory).Equals(input, StringComparison.OrdinalIgnoreCase))
+                    {
+                        NavigateDirectory(directory);
+                        found = true;
+                        break;
+                    }
+                }
+
+                foreach (var file in files)
+                {
+                    if (Path.GetFileName(file).Equals(input, StringComparison.OrdinalIgnoreCase))
+                    {
+                        SelectFile(file);
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found)
+                {
+                    Console.WriteLine("Файл или папка не найдены.");
+                }
+            }
+        }
+
+        private static void SelectFile(string filePath)
+        {
+            selectedFile = filePath;
+            Console.Clear();
+            Console.WriteLine($"Вы выбрали файл: {filePath}");
+            Console.WriteLine("Нажмите любую клавишу для возврата в основное меню...");
             Console.ReadKey();
+            ShowMainMenu();
+        }
+
+        private static void ShowMainMenu()
+        {
+            var elems = new[]
+            {
+                new Element($"Выбран файл: {selectedFile}"),
+                new Element("Копировать файл") { Command = CopyFile },
+                new Element("Изменить файл") { Command = ChangeFile },
+                new Element("Изменить имя файла") { Command = RenameFile },
+                new Element("       \n Выход \n       ") { Command = Exit }
+            };
+
+            Menu menu = new Menu(elems);
+            while (true)
+            {
+                menu.Draw();
+                var key = Console.ReadKey(true).Key;
+                switch (key)
+                {
+                    case ConsoleKey.UpArrow:
+                        menu.SelectPrev();
+                        break;
+                    case ConsoleKey.DownArrow:
+                        menu.SelectNext();
+                        break;
+                    case ConsoleKey.Enter:
+                        menu.ExecuteSelected();
+                        break;
+                    default:
+                        return;
+                }
+            }
+        }
+
+        private static void CopyFile()
+        {
+            Console.Clear();
+            Console.WriteLine($"Файл {selectedFile} скопирован.");
+            Console.ReadKey();
+            ShowMainMenu();
+        }
+
+        private static void ChangeFile()
+        {
+            Console.Clear();
+            Console.WriteLine($"Файл {selectedFile} изменён.");
+            Console.ReadKey();
+            ShowMainMenu();
+        }
+
+        private static void RenameFile()
+        {
+            Console.Clear();
+            Console.WriteLine($"Файл {selectedFile} переименован.");
+            Console.ReadKey();
+            ShowMainMenu();
         }
 
         private static void Exit()
@@ -108,6 +208,7 @@ namespace File_manager
     }
 
     delegate void CommandHandler();
+
     class Menu
     {
         public Element[] Elements { get; set; }
