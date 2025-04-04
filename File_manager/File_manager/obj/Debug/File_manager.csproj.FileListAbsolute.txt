@@ -1,0 +1,7 @@
+C:\Users\Stani\Desktop\практика бек\File_manager\File_Manager\File_manager\File_manager\bin\Debug\File_manager.exe.config
+C:\Users\Stani\Desktop\практика бек\File_manager\File_Manager\File_manager\File_manager\bin\Debug\File_manager.exe
+C:\Users\Stani\Desktop\практика бек\File_manager\File_Manager\File_manager\File_manager\bin\Debug\File_manager.pdb
+C:\Users\Stani\Desktop\практика бек\File_manager\File_Manager\File_manager\File_manager\obj\Debug\File_manager.csproj.AssemblyReference.cache
+C:\Users\Stani\Desktop\практика бек\File_manager\File_Manager\File_manager\File_manager\obj\Debug\File_manager.csproj.CoreCompileInputs.cache
+C:\Users\Stani\Desktop\практика бек\File_manager\File_Manager\File_manager\File_manager\obj\Debug\File_manager.exe
+C:\Users\Stani\Desktop\практика бек\File_manager\File_Manager\File_manager\File_manager\obj\Debug\File_manager.pdb
