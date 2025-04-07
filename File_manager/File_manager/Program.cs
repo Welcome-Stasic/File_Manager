@@ -139,7 +139,7 @@ namespace File_manager
             selectedFile = filePath;
             Console.Clear();
             Console.WriteLine($"Вы выбрали файл: {filePath}");
-            Console.WriteLine("Нажмите любую клавишу для возврата в основное меню...");
+            Console.WriteLine("Нажмите любую клавишу для возврата в основное меню");
             Console.ReadKey();
             ShowMainMenu();
         }
@@ -150,8 +150,8 @@ namespace File_manager
             {
                 new Element($"Выбран файл: {selectedFile}"),
                 new Element("Копировать файл") { Command = CopyFile },
-                new Element("Изменить файл") { Command = ChangeFile },
-                new Element("Изменить имя файла") { Command = RenameFile },
+                new Element("Удалить файл") { Command = DeleteFile },
+                new Element("Информация о файле") { Command = InformateFile },
                 new Element("       \n Выход \n       ") { Command = Exit }
             };
 
@@ -180,23 +180,86 @@ namespace File_manager
         private static void CopyFile()
         {
             Console.Clear();
-            Console.WriteLine($"Файл {selectedFile} скопирован.");
-            Console.ReadKey();
-            ShowMainMenu();
+            Console.WriteLine("Введите путь куда скопировать файл");
+            var put = Console.ReadLine();
+
+            bool copy = false;
+
+            if (Directory.Exists(put))
+            {
+                try
+                {
+                    string destinationFile = Path.Combine(put, Path.GetFileName(selectedFile));
+                    string putFile = Path.GetFileName(selectedFile);
+                    File.Copy(selectedFile, destinationFile, overwrite: true);
+                    Console.WriteLine($"Файл {putFile} скопирован в {destinationFile}.");
+                    copy = true;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ошибка при копировании файла: {ex.Message}");
+                }
+            }
+            else
+            {
+                Console.Clear();
+                Console.WriteLine("Директорий не найден.");
+            }
+
+            if (copy)
+            {
+                Console.ReadKey();
+                ShowMainMenu();
+            }
         }
 
-        private static void ChangeFile()
+        private static void DeleteFile()
         {
             Console.Clear();
-            Console.WriteLine($"Файл {selectedFile} изменён.");
-            Console.ReadKey();
-            ShowMainMenu();
-        }
+            Console.WriteLine("Точно хотите удалить файл?");
 
-        private static void RenameFile()
+            string response;
+            bool delete = false;
+            string Pat = selectedFile;
+
+            do
+            {
+                Console.WriteLine("Введите ответ y/n");
+                response = Console.ReadLine();
+            } while (response != "y" && response != "n");
+
+            switch (response)
+            {
+                case "n":
+                    Console.WriteLine("Ну ладно");
+                    ShowMainMenu();
+                    break;
+                case "y":
+                    try
+                    {
+                        File.Delete(Pat);
+                        Console.WriteLine($"Файл {Pat} удалён.");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Ошибка: {ex.Message}");
+                    }
+                    Console.ReadKey();
+                    ShowMainMenu();
+                    break;
+            }
+        }
+        private static void InformateFile()
         {
             Console.Clear();
-            Console.WriteLine($"Файл {selectedFile} переименован.");
+            string Pat = selectedFile;
+            FileInfo fileInfo = new FileInfo(Pat);
+
+            Console.WriteLine("Информация о файле:");
+            Console.WriteLine($"Полный путь: {fileInfo.FullName}");
+            Console.WriteLine($"Размер: {fileInfo.Length} байт");
+            Console.WriteLine($"Дата создания: {fileInfo.CreationTime}");
+            Console.WriteLine($"Дата последнего изменения: {fileInfo.LastWriteTime}");
             Console.ReadKey();
             ShowMainMenu();
         }
