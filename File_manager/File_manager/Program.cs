@@ -100,7 +100,7 @@ namespace File_manager
                     elements.Add(new Element(Path.GetFileName(file)) { Command = () => SelectFile(file) });
                 }
 
-                Console.WriteLine("\nВведите название файла или подкаталога для навигации, или 'exit' для выхода.");
+                Console.WriteLine("Введите название файла или подкаталога для навигации, или 'exit' для выхода.");
 
                 string input = Console.ReadLine();
                 if (input.ToLower() == "exit") return;
@@ -139,7 +139,6 @@ namespace File_manager
             selectedFile = filePath;
             Console.Clear();
             Console.WriteLine($"Вы выбрали файл: {filePath}");
-            Console.WriteLine("Нажмите любую клавишу для возврата в основное меню");
             Console.ReadKey();
             ShowMainMenu();
         }
